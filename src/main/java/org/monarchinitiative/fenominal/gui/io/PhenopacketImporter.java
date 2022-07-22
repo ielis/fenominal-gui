@@ -3,9 +3,6 @@ package org.monarchinitiative.fenominal.gui.io;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.JsonFormat;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.monarchinitiative.fenominal.core.FenominalRunTimeException;
 
 
@@ -21,9 +18,10 @@ import org.phenopackets.schema.v2.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
@@ -141,31 +139,13 @@ public class PhenopacketImporter {
      * @return {@link PhenopacketImporter} object corresponding to the PhenoPacket
      */
     public static PhenopacketImporter fromJson(File phenopacketFile, Ontology ontology) {
-        JSONParser parser = new JSONParser();
-        logger.trace("Importing Phenopacket: " + phenopacketFile);
-        try {
-            Object obj = parser.parse(new FileReader(phenopacketFile));
-            JSONObject jsonObject = (JSONObject) obj;
-            String phenopacketJsonString = jsonObject.toJSONString();
-            Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();
-            JsonFormat.parser().merge(phenopacketJsonString, phenoPacketBuilder);
-            return new PhenopacketImporter(phenoPacketBuilder.build(), ontology);
+        try (BufferedReader reader = Files.newBufferedReader(phenopacketFile.toPath())) {
+            Phenopacket.Builder builder = Phenopacket.newBuilder();
+            JsonFormat.parser().merge(reader, builder);
+            return new PhenopacketImporter(builder.build(), ontology);
         } catch (IOException e1) {
             throw new FenominalRunTimeException("I/O Error: Could not load phenopacket  (" + phenopacketFile + "): " + e1.getMessage());
-        } catch (ParseException ipbe) {
-            System.err.println("[ERROR] Malformed phenopacket: " + ipbe.getMessage());
-            throw new FenominalRunTimeException("Could not load phenopacket (" + phenopacketFile + "): " + ipbe.getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-
 
 }

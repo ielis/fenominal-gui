@@ -15,7 +15,6 @@ module org.monarchinitiative.fenominal.gui {
     requires com.google.protobuf.util;
     requires org.phenopackets.schema;
     requires org.phenopackets.phenopackettools.builder;
-    requires json.simple;
     requires spring.boot.autoconfigure;
     requires org.controlsfx.controls;
     requires spring.boot;
